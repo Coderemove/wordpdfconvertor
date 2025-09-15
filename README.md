@@ -1,6 +1,6 @@
 # CV Converter
 
-This project provides a script to convert CVs or related documents. It is designed for Windows usage.
+This project provides a script/exe to convert CVs or related documents. It is designed for Windows usage.
 
 ## Version
 
@@ -12,6 +12,7 @@ This project provides a script to convert CVs or related documents. It is design
 
 ## Dependencies
 - Python 3.7+
+- Microsoft Word (for document handling)
 - [PyInstaller](https://www.pyinstaller.org/) (for building executable)
 - Any additional dependencies listed in `convert.py` (see code for details)
 
