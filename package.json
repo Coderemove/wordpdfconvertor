@@ -1,0 +1,13 @@
+{
+  "name": "cv-converter",
+  "version": "1.0.0",
+  "description": "A script to convert CVs or related documents for Windows.",
+  "license": "MIT",
+  "main": "convert.py",
+  "scripts": {
+    "build": "pyinstaller --onefile --icon=icon.ico convert.py"
+  },
+  "keywords": ["cv", "converter", "windows", "pyinstaller"],
+  "author": "",
+  "dependencies": {}
+}
