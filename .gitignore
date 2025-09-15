@@ -1,2 +1,80 @@
-.venv312
+
+# ==========================
+# Python / Windows project
+# ==========================
+
+# Virtual environments
+.venv/
+.venv312/
+venv/
+env/
+ENV/
+.venv.bak/
+venv.bak/
+
+# Byte-compiled / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.so
+*.dylib
+
+# Packaging / metadata
+*.egg
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+share/python-wheels/
+
+# Build artifacts (PyInstaller, setuptools, etc.)
+build/
+dist/
+*.spec
+
+# Logs
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+
+# Type checker / linter caches
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+.pyright/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.code-workspace
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node (package.json present)
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.yarn/cache/
+.yarn-integrity
 

@@ -1,23 +1,66 @@
-# PyInstaller build script for PDF/DOCX Converter GUI
-# Run this script in PowerShell to build a standalone Windows .exe
+# PyInstaller build script for Windows
 
-# Use relative path for Python executable in .venv312
-$venvPath = ".\.venv312"
-$python = Join-Path $venvPath "Scripts\python.exe"
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
 
-# Activate virtual environment
-& "$venvPath\Scripts\Activate.ps1"
+# Always work from the script directory
+Set-Location -Path $PSScriptRoot
 
-# Kill any existing convert.exe processes
-Write-Host "Killing any existing convert.exe processes..."
-Get-Process convert* | Stop-Process -Force -ErrorAction SilentlyContinue
+# Paths
+$venvPath = Join-Path $PSScriptRoot '.venv312'
+$python   = Join-Path $venvPath 'Scripts\python.exe'
+$script   = Join-Path $PSScriptRoot 'convert.py'
+$distDir  = Join-Path $PSScriptRoot 'dist'
+$iconPath = Join-Path $PSScriptRoot 'icon.ico'
 
-# Install dependencies if not already installed
-Write-Host "Installing PyInstaller and project dependencies..."
-& $python -m pip install --upgrade pip
-& $python -m pip install pyinstaller pdf2docx docx2pdf
+function RunPy {
+    param([Parameter(Mandatory=$true)][string[]]$Args)
+    & $python @Args
+    if ($LASTEXITCODE -ne 0) { throw "python $($Args -join ' ') failed with exit code $LASTEXITCODE" }
+}
 
-$script = "convert.py"
+function RunPyCode {
+    param([Parameter(Mandatory=$true)][string]$Code)
+    $tmp = [System.IO.Path]::GetTempFileName()
+    Set-Content -Path $tmp -Value $Code -Encoding UTF8
+    & $python $tmp
+    $rc = $LASTEXITCODE
+    Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+    if ($rc -ne 0) { throw "inline python failed with exit code $rc" }
+}
 
-# Build command: onedir for folder with exe, windowed to hide console, with icon and hidden imports for COM
-& "$venvPath\Scripts\pyinstaller.exe" --onedir --windowed --icon=icon.ico --hidden-import pywintypes --hidden-import win32com --distpath dist $script
+# Ensure venv exists
+if (-not (Test-Path $python)) {
+    Write-Host "Creating virtual environment at $venvPath ..."
+    if (Get-Command py -ErrorAction SilentlyContinue) {
+        & py -3 -m venv $venvPath
+    } else {
+        & python -m venv $venvPath
+    }
+    if (-not (Test-Path $python)) { throw "Failed to create venv at $venvPath" }
+}
+
+# Kill any running convert.exe
+Write-Host "Stopping any running convert.exe ..."
+Get-Process convert -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
+# Ensure pip and tools
+Write-Host "Upgrading pip/setuptools/wheel ..."
+RunPy @('-m','ensurepip','--upgrade')
+RunPy @('-m','pip','install','--upgrade','pip','setuptools','wheel')
+
+# Install build/runtime deps in venv
+Write-Host "Installing dependencies (PyInstaller, pdf2docx, docx2pdf, pywin32) ..."
+RunPy @('-m','pip','install','pyinstaller','pdf2docx','docx2pdf','pywin32')
+
+# Verify PyInstaller is importable in this venv without -c quoting issues
+RunPyCode 'import PyInstaller, sys; print("PyInstaller OK", PyInstaller.__version__)'
+
+# Build
+Write-Host "Building executable ..."
+$pyiArgs = @('-m','PyInstaller','--onedir','--windowed','--distpath', $distDir,'--hidden-import','pywintypes','--hidden-import','win32com')
+if (Test-Path $iconPath) { $pyiArgs += @('--icon', $iconPath) }
+$pyiArgs += @($script)
+RunPy $pyiArgs
+
+Write-Host "Build complete. See: $distDir"
